@@ -1,0 +1,34 @@
+
+#!/bin/bash
+# Update the package manager and install Apache
+sudo apt update -y
+sudo apt install apache2 -y
+
+# Enable Apache to start on boot
+sudo systemctl enable apache2
+sudo systemctl start apache2
+
+# Ensure Apache has correct permissions for the default directory
+sudo chmod -R 755 /var/www/html
+sudo chown -R www-data:www-data /var/www/html
+
+# Get the instance's IP address and hostname
+IP_ADDRESS=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+HOSTNAME=$(hostname)
+
+# Create a basic HTML file in Apache's default directory
+echo "<html>
+  <head>
+    <title>EC2 Instance Info</title>
+  </head>
+  <body>
+    <h1>Welcome to your EC2 instance - AAMIR</h1>
+    <p><b>IP Address:</b> $IP_ADDRESS</p>
+    <p><b>Hostname:</b> $HOSTNAME</p>
+    <p><b>Date and Time:</b> $(date)</p>
+
+  </body>
+</html>" | sudo tee /var/www/html/index.html > /dev/null
+
+# Restart Apache to ensure the new page is served
+sudo systemctl restart apache2
